@@ -1,0 +1,7 @@
+## 2.2. What's the running time of the `binarySearch_2()` is N in Big-Oh representation, when the size of `list_in`? Explain why you think like that.
+
+1. Write your Answer in the blank: 
+
+   binarySearch_2() runs in O(   )  
+
+2. Explain your reason below:
