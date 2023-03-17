@@ -2,6 +2,24 @@
 
 1. Write your Answer in the blank: 
 
-   binarySearch_1() runs in O(   )  
+   binarySearch_1() runs in O(N)  
 
 2. Explain your reason below:
+    `binarySearch` 알고리즘을 간단하게 설명하자면, 마치 사람이 영한사전에서 영단어의 한글뜻을 찾듯 
+    order를 가지고 sort된 list에서 어떤 찾고자 하는 값을 찾기 위해 
+    list의 중간에 위치한 값이 찾는 값인지 확인하고
+    아니라면 찾는 값이 list의 중간에 위치한 값보다 작은 값인지 큰 값인지 비교해서 
+    작은 값이면 중간보다 앞에 있는 값들을 가지고 다시 중간값 비교 찾기를 시행하고 
+    큰값이면 중간보다 뒤에 있는 값들을 가지고 다시 중간값 비교 찾기를 시행하는 것을 계속 반복해가며 시행해서
+    최악의 경우 list를 element 1개 단위로 쪼개서 찾고자 하는 값을 찾아내는 알고리즘이다.
+    이 `binarySearch` 알고리즘을 python 코드로 구현한 것이 바로 `binarySearch_1()`과 `binarySearch_2()`인데,
+    `binarySearch_1()`이 `binarySearch_2()`과 비교할 때 가장 구분되는 큰 특징은 
+    `binarySearch_1()`은 중간값 비교 찾기 이후에 중간보다 앞 혹은 뒤에 있는 값들을 가지고 새로운 리스트를 만들어서 
+     recursion을 수행한다는 것이다. 
+     이렇게 되면, Best case의 경우, list_in이 들어왔을 때 left와 right를 나누면서 O(N) time을 소모하고, 
+     recursion 없이 바로 list_in[mid] == value가 true가 되면서 최종적으로 O(N) time이 걸리게 된다.
+     Worst case의 경우, list_in이 들어왔을 때 앞에서 언급한 것처럼 list_in을 element 1개 단위까지 쪼개고 원하는 
+     value를 찾는 상황이므로, recursion 횟수를 k라 할때 2^k=N이 되어 k를 logN으로 구할 수 있다.
+     그런데 매 k번째 recursion 시에 list_in을 left와 right로 나누면서 O(N/2^k) time을 소모하므로
+     최종적으로 O{(N+N/2+N/4+...+N/2^k)} = O{N(1-1/2^k)/(1-1/2)} = O{N(1-1/N)*2} = O{2(N-1)}. 
+     즉, O(N) time이 걸리게 된다.
