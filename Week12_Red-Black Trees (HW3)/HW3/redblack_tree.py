@@ -20,33 +20,33 @@ class RedBlackTree():
 
     def __len__(self):
         return self._size
-
+    
+    # Search for the element in the sub red-black tree whose root is given node.
+    # return: _Node object whose element is given element if it's existing, or _Node object whose element is not given element and one of its children is None if it's non-existing
     def subSearch(self, node, element):
-        if node._element == None:
-            return node
-        elif node._element > element:
-            return self.subSearch(node._left, element)
-        elif self._root._element < element:
-            return self.subSearch(node._right, element)
+        if node._element > element:
+            if node._left != None:
+                return self.subSearch(node._left, element)
+            else: return node
+        elif node._element < element:
+            if node._right != None:
+                return self.subSearch(node._right, element)
+            else: return node
         elif node._element == element:
             return node
         
     # Search for the element in the red-black tree.
     # return: _Node object, or None if it's non-existing
     def search(self, element):
-        if self._root._element > element:
-            targetNode = self.subSearch(self._root._left, element)
-            if targetNode._element == None:
+        if self._root == None:
+            return None
+        else:
+            targetNode = self.subSearch(self._root, element)
+            if targetNode._element == element:
+                return targetNode._element
+            else:
                 return None
-            else: return targetNode
-        elif self._root._element < element:
-            targetNode = self.subSearch(self._root._right, element)
-            if targetNode._element == None:
-                return None
-            else: return targetNode
-        elif self._root._element == element:
-            return self._root
-        
+
     def isLeft(self, node):
         if node == self._root:
             return False
@@ -60,59 +60,184 @@ class RedBlackTree():
         elif node._parent._right == node:
             return True
         else: return False
+    
+    def isBLACK(self, node):
+        if node == None:
+            return True
+        elif node._color == self._Node.BLACK:
+            return True
+        else: return False
         
     def singleRot(self, node): # Zig case
         if self.isLeft(node) == True:
-            node._parent, node._right, node._parnet._left, node._parent._parent = node._parent._parent, node._parent, node._right, node._parnet._left
+            x = node
+            T2 = node._right
+            y = node._parent
+            z = node._parent._parent
+            a = x._color
+            b = y._color
+            x._color = b
+            y._color = a
+            node._parent = z
+            if z != None:
+                if z._left == y:
+                    z._left = x
+                elif z._right == y:
+                    z._right = x
+            else: self._root = x
+            node._right = y
+            node._right._parent = x
+            node._right._left =T2
+            if T2 != None:
+                T2._parent = y
+            
         elif self.isRight(node) == True:
-            node._parent, node._right, node._parnet._left, node._parent._parent = node._right, node._parnet._left, node._parent._parent, node._parent
+            y = node
+            T2 = node._left
+            x = node._parent
+            z = node._parent._parent
+            a = x._color
+            b = y._color
+            x._color = b
+            y._color = a
+            node._parent = z
+            if z != None:
+                if z._left == x:
+                    z._left = y
+                elif z._right == x:
+                    z._right = y
+            else: self._root = y
+            node._left = x
+            node._left._parent = y
+            node._left._right = T2
+            if T2 != None:
+                T2._parent = x
     
     def trinodeReconstruction(self, node):
         x = node
         y = node._parent
-        z = y._parent
         if (self.isLeft(x) and self.isLeft(y)) or (self.isRight(x) and self.isRight(y)) == True: #Zig-Zig case
             self.singleRot(y)
         elif (self.isLeft(x) and self.isRight(y)) or (self.isRight(x) and self.isLeft(y)) == True: #Zig-Zag case
             self.singleRot(x)
-            self.singleRot(y)
+            self.singleRot(x)
     
     def doubleRED(self, node):
         z = node
         v = node._parent
         w = self._sibiling(v)
-        if w._color == self._Node.BLACK: # Case1
+        if self.isBLACK(w) == True: # Case1
             self.trinodeReconstruction(z)
-        elif w._color == self._Node.RED: # Case2
+        elif self.isBLACK(w) == False: # Case2
+            v._color = self._Node.BLACK
             w._color = self._Node.BLACK
             if w._parent != self._root:
-                w._parent.color = self._Node.RED
-        if w._parent._color == self._Node.RED:
-                    self.doubleRED(targetNode)
+                w._parent._color = self._Node.RED
+                if self.isBLACK(w._parent._parent) == False:
+                    self.doubleRED(w._parent)
 
     def insert(self, element):
         if len(self) == 0:
             self._root = self._Node(element, color=self._Node.BLACK)
-            self._root._left = self._Node(None, parent=self._root, color=self._Node.BLACK)
-            self._root._right = self._Node(None, parent=self._root, color=self._Node.BLACK)
             self._size = self._size + 1
         else:
-            targetNode = self.search(element)
-            if targetNode._element == None:
-                targetNode._element = element
-                targetNode._left = self._Node(None, parent=targetNode, color=self._Node.BLACK)
-                targetNode._right = self._Node(None, parent=targetNode, color=self._Node.BLACK)
-                targetNode._color = self._Node.RED
+            targetNode = self.subSearch(self._root, element)
+            if targetNode._element != element:
+                if targetNode._element > element:
+                    targetNode._left = self._Node(element, parent=targetNode, color=self._Node.RED)
+                    if self.isBLACK(targetNode) == False:
+                        self.doubleRED(targetNode._left)
+                else:
+                    targetNode._right = self._Node(element, parent=targetNode, color=self._Node.RED)
+                    if self.isBLACK(targetNode) == False:
+                        self.doubleRED(targetNode._right) # recursive double red
                 self._size = self._size + 1
-                if targetNode._parent._color == self._Node.RED:
-                    self.doubleRED(targetNode)
-            else:
-                raise ValueError('Element already exist.')
+            else: raise ValueError('Element already exist.')
 
+    def doubleBLACK(self, parent, direction):
+        z = parent
+        if direction == 'LEFT': 
+            Tlight = z._left 
+            Theavy = z._right
+        elif direction == 'RIGHT':
+            Tlight = z._right
+            Theavy = z._left
+        if (self.isBLACK(Theavy) == True) and (self.isBLACK(Theavy._left) and self.isBLACK(Theavy._right) == True): # Case2
+            if self.isBLACK(z) == False:
+                z._color = self._Node.BLACK
+                Theavy._color = self._Node.RED
+            elif self.isBLACK(z) == True:
+                Theavy._color = self._Node.RED
+                if z._parent != None:
+                    if z._parent._left == z:
+                        self.doubleBLACK(z._parent, 'LEFT')
+                    elif z._parent._right == z:
+                        self.doubleBLACK(z._parent, 'RIGHT')
+        elif (self.isBLACK(Theavy) == True) and ((self.isBLACK(Theavy._left) == False) or (self.isBLACK(Theavy._right) == False)): # Case1
+            if self.isBLACK(Theavy._right) == False:
+                if Theavy._right != None: Theavy._right._color = self._Node.BLACK
+                self.trinodeReconstruction(Theavy._right)
+            elif self.isBLACK(Theavy._left) == False:
+                if Theavy._left != None: Theavy._left._color = self._Node.BLACK
+                self.trinodeReconstruction(Theavy._left)
+            z._color = self._Node.BLACK
+        elif (self.isBLACK(Theavy) == False): # Case3
+            self.singleRot(Theavy)
+            if z._left == Tlight:
+                self.doubleBLACK(z, 'LEFT')
+            elif z._right == Tlight:
+                self.doubleBLACK(z, 'RIGHT')
+                
     def delete(self, element):
-        ## IMPLEMENT
-        pass
-
+        targetNode = self.subSearch(self._root, element)
+        if targetNode._element == element:
+            answer = targetNode._element
+            if targetNode._right == None:
+                r = targetNode._left
+                v = targetNode
+                z = targetNode._parent
+                if z == None:
+                    self._root = r
+                    if r != None: 
+                        r._parent = None
+                        r._color = self._Node.BLACK
+                    self._size = self._size - 1
+                elif z._left == v:
+                    z._left = r
+                    if r != None: r._parent = z
+                    self._size = self._size - 1
+                    if self.isBLACK(v) == True:
+                        self.doubleBLACK(z, 'LEFT')
+                elif z._right == v:
+                    z._right = r
+                    if r != None: r._parent = z
+                    self._size = self._size - 1
+                    if self.isBLACK(v) == True:
+                        self.doubleBLACK(z, 'RIGHT')
+            else:
+                v = self._successor(targetNode)
+                v._element, targetNode._element = targetNode._element, v._element
+                if v._left != None:
+                    r = v._left
+                elif v._right != None:
+                    r = v._right
+                else: r = None
+                z = v._parent
+                if z._left == v:
+                    z._left = r
+                    if r != None: r._parent = z
+                    self._size = self._size - 1
+                    if self.isBLACK(v) == True:
+                        self.doubleBLACK(z, 'LEFT')
+                elif z._right == v:
+                    z._right = r
+                    if r != None: r._parent = z
+                    self._size = self._size - 1
+                    if self.isBLACK(v) == True:
+                        self.doubleBLACK(z, 'RIGHT')
+            return answer
+        else: return None
+        
     # BONUS FUNCTIONS -- use them freely if you want
     def _is_black(self, node):
         return node == None or node._color == self._Node.BLACK
