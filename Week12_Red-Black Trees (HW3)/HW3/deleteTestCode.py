@@ -3,7 +3,6 @@ from redblack_tree import RedBlackTree
 # Preparing a tree for the test
 T = RedBlackTree()
 
-"""
 T.insert(50)
 T.insert(150)
 T.insert(30)
@@ -24,14 +23,14 @@ T.display()
 
 T.delete(250)
 T.display()
-"""
+
 #-----------------------------------------------------------------------------------------------------------------
 # Make some random sequence, and check
 import random
 random.seed()
 
 # make some non-duplicated numbers
-numbers = list(range(50))
+numbers = list(range(10000))
 random.shuffle(numbers)
 
 # iterate through the numbers, and insert them into the tree
@@ -45,13 +44,11 @@ for n in numbers:
     assert(T._size == count), f"The size of the tree is different from expected number, {T._size}, {count}"
     assert(T.check_tree_property_silent() == True), "The red-black tree property is broken"
 
-T.display()
 random.shuffle(numbers)
 for n in numbers:
     print(f'deleting {n} ...')
     T.delete(n)
     count -= 1
-    T.display()
     assert(T.search(n) == None), "The deleted item is still remaining in the tree"
     assert(T._size == count), f"The size of the tree is different from expected number, {T._size}, {count}"
     assert(T.check_tree_property_silent() == True), "The red-black tree property is broken"

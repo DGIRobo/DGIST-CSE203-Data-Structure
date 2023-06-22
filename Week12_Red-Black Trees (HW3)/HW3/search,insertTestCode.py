@@ -1,5 +1,5 @@
 from redblack_tree import RedBlackTree
-"""
+
 # Example test cases to verify your implementation
 T = RedBlackTree()
 
@@ -46,7 +46,7 @@ T.display()
 node_125 = T.search(125)
 print(node_125)
 print(T.search(1111))
-"""
+
 #-----------------------------------------------------------------------------------------------------------------
 # Make some random sequence, and check
 import random
